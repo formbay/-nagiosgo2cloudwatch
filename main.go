@@ -10,9 +10,9 @@ import (
 	"log"
 	"net/http"
 	"os"
-		"regexp"
-			"strings"
-				"log"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
 type CW struct {
@@ -48,6 +48,29 @@ func (cw *CW) AddData(suffix string, value float64) *CW {
 	}
 	cw.Data = append(cw.Data, data)
 	return cw
+}
+
+func StripUnits(value string) float64 {
+	reg, err := regexp.Compile("[^0-9]+")
+	if err != nil {
+		log.Fatal(err)
+	}
+	processedString := reg.ReplaceAllString(value, "")
+	newFloat, _ := strconv.ParseFloat(processedString, 64)
+	return newFloat
+}
+
+func ProcessOutput(output string) map[string]float64 {
+	outPut := make(map[string]float64)
+	a := strings.Split(output, "|")
+	b := a[len(a)-1]
+	b = strings.TrimSpace(b)
+	for _, token := range strings.Split(b, " ") {
+		pair := strings.Split(token, ";")
+		keypair := strings.Split(pair[0], "=")
+		outPut[keypair[0]] = StripUnits(keypair[1])
+	}
+	return outPut
 }
 
 func main() {
@@ -128,40 +151,10 @@ func main() {
 
 		//Add status to CW object
 		fmt.Println(cw.AddData("Status", float64(status)))
-
-		//Add output to CW object
-		c := strings.Split(a, "|")
-		########################################################
-		c := strings.Split(a, "|")
-			d := c[len(c)-1]
-				d = strings.Trim(d, " ")
-					fmt.Println("d", d)
-
-						for _, token := range strings.Split(d, " ") {
-								fmt.Println("token", token)
-							
-									pair := strings.Split(token, ";")
-										fmt.Println("pair", pair[0])
-									
-											keypair := strings.Split(pair[0], "=")
-												fmt.Println("keypair", keypair)
-											
-													//key := keypair[0]
-														value := keypair[1]
-															fmt.Println(StripUnits(value))
-															}
-														}
-
-														func StripUnits(value string) string {
-															reg, err := regexp.Compile("[^0-9]+")
-															if err != nil {
-																	log.Fatal(err)
-																	}
-																	processedString := reg.ReplaceAllString(value, "")
-																	return processedString 
-																}
-																########################################################
-
+		ProcessOutput(output)
+		for k, v := range ProcessOutput(output) {
+			fmt.Println(cw.AddData(k, v))
+		}
 		return nil
 	}
 
