@@ -10,68 +10,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"regexp"
-	"strconv"
 	"strings"
 )
-
-type CW struct {
-	Namespace  string
-	BaseName   string
-	Dimensions []map[string]string
-	Data       []CWData
-}
-
-type CWData struct {
-	MetricName string
-	Value      float64
-	Dimensions []map[string]string
-}
-
-func NewCW(namespace string, basename string, dimensions string) *CW {
-	var dimMaps []map[string]string
-	for _, pair := range strings.Split(dimensions, ",") {
-		keyVal := strings.Split(pair, "=")
-		if len(keyVal) == 1 {
-			continue
-		}
-		dimMaps = append(dimMaps, map[string]string{keyVal[0]: keyVal[1]})
-	}
-	return &CW{namespace, basename, dimMaps, []CWData{}}
-}
-
-func (cw *CW) AddData(suffix string, value float64) *CW {
-	data := CWData{
-		cw.BaseName + "-" + suffix,
-		value,
-		cw.Dimensions,
-	}
-	cw.Data = append(cw.Data, data)
-	return cw
-}
-
-func StripUnits(value string) float64 {
-	reg, err := regexp.Compile("[^0-9]+")
-	if err != nil {
-		log.Fatal(err)
-	}
-	processedString := reg.ReplaceAllString(value, "")
-	newFloat, _ := strconv.ParseFloat(processedString, 64)
-	return newFloat
-}
-
-func ProcessOutput(output string) map[string]float64 {
-	outPut := make(map[string]float64)
-	a := strings.Split(output, "|")
-	b := a[len(a)-1]
-	b = strings.TrimSpace(b)
-	for _, token := range strings.Split(b, " ") {
-		pair := strings.Split(token, ";")
-		keypair := strings.Split(pair[0], "=")
-		outPut[keypair[0]] = StripUnits(keypair[1])
-	}
-	return outPut
-}
 
 func main() {
 	var region string

@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// RunCommand executes a command with arguments
 func RunCommand(cmdName string, cmdArgs []string, timeout int) (int, string) {
 
 	// the command we're going to run
