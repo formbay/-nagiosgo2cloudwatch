@@ -9,7 +9,7 @@ import (
 
 // StripUnits removes trailing units from a metric value
 func StripUnits(value string) float64 {
-	reg, err := regexp.Compile("[^0-9]+")
+	reg, err := regexp.Compile("[^0-9.]+")
 	if err != nil {
 		log.Fatal(err)
 	}
