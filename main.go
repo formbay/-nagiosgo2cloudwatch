@@ -52,7 +52,7 @@ func main() {
 		}
 
 		//Dimensions
-		if !c.IsSet("dimensions") {
+		if c.IsSet("dimensions") {
 			cliargs.SetDimensions(c.String("dimensions"))
 		}
 
